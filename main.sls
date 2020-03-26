@@ -28,12 +28,22 @@ screen-conf:
     - mode: ensure
     - location: end
 
+set_postgres password:
+  cmd.run:
+    - name: sudo -u postgres psql postgres -c "ALTER USER postgres with password 'test';"
+
 screen-postgres:
   file.line:
     - name: /etc/postgresql/10/main/pg_hba.conf
     - content: 'local   all   postgres   md5'
     - mode: ensure
     - location: end
+
+postgresql-start:
+  service.running:
+    - name: postgresql
+    - enable: True
+    - start: True
 
 postgres-user:
   postgres_user.present:
@@ -44,6 +54,12 @@ postgres-user:
     - db_password: test
     - db_host: localhost
     - db_port: 5432
+
+postgresql-restart:
+  service.running:
+    - name: postgresql
+    - enable: True
+    - full_restart: True
 
 update_all_gems:
   cmd.run:
