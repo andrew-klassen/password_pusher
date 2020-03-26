@@ -4,6 +4,16 @@ clone_password_push_repo:
     - name: https://github.com/pglombardo/PasswordPusher.git
     - target: /srv/salt/password_push
 
+copy_gemfile:
+  file.managed:
+    - name: /srv/salt/password_push/Gemfile
+    - source: salt://Gemfile
+
+copy_database:
+  file.managed:
+    - name: /srv/salt/password_push/config/database.yml
+    - source: salt://database.yml
+
 php.packages:
   pkg.installed:
     - pkgs:
@@ -21,39 +31,9 @@ php.packages:
       - postgresql-10
       - postgresql-client-10
 
-screen-conf:
-  file.line:
-    - name: /etc/postgresql/10/main/pg_hba.conf
-    - content: 'local   all   pwpush_user   md5'
-    - mode: ensure
-    - location: end
-
 set_postgres password:
   cmd.run:
-    - name: sudo -u postgres psql postgres -c "ALTER USER postgres with password 'test';"
-
-screen-postgres:
-  file.line:
-    - name: /etc/postgresql/10/main/pg_hba.conf
-    - content: 'local   all   postgres   md5'
-    - mode: ensure
-    - location: end
-
-postgresql-start:
-  service.running:
-    - name: postgresql
-    - enable: True
-    - start: True
-
-postgres-user:
-  postgres_user.present:
-    - name: pwpush
-    - superuser: True
-    - password: 'test'
-    - db_user: postgres
-    - db_password: test
-    - db_host: localhost
-    - db_port: 5432
+    - name: /srv/salt/create_database_user.sh 
 
 postgresql-restart:
   service.running:
@@ -79,7 +59,7 @@ forman_gem:
       
 bundle_install:
   cmd.run:
-    - name: bundle install --without development production test --deployment 
+    - name: bundle install --deployment 
     - cwd: /srv/salt/password_push
 
 bundle_exec_rake:
@@ -92,8 +72,8 @@ bundle_exec_setup:
     - name: RAILS_ENV=production bundle exec rake db:setup
     - cwd: /srv/salt/password_push
 
-foreman:
-  cmd.run:
-    - name: foreman start internalweb &
-    - cwd: /srv/salt/password_push
+#foreman:
+#  cmd.run:
+#    - name: foreman start internalweb &
+#    - cwd: /srv/salt/password_push
 

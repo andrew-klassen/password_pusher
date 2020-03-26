@@ -1,0 +1,33 @@
+base: &base
+  adapter: sqlite3
+  timeout: 5000
+
+development:
+  database: db/development.sqlite3
+  <<: *base
+
+test:
+  database: db/test.sqlite3
+  <<: *base
+
+private:
+  adapter: postgresql
+  host: localhost
+  database: pwpusher
+  username: pwpusher_database_user
+  password: test
+  pool: 5
+  timeout: 5000
+  encoding: utf8
+  reconnect: false
+
+production:
+  adapter: postgresql
+  host: localhost
+  database: pwpusher
+  username: pwpusher_database_user
+  password: test
+  pool: 5
+  timeout: 5000
+  encoding: utf8
+  reconnect: false
