@@ -14,6 +14,7 @@ copy_database.yml:
   file.managed:
     - name: /srv/salt/password_push/config/database.yml
     - source: salt://source/database.yml
+    - template: jinja
 
 copy_.env:
   file.managed:

@@ -1,3 +1,5 @@
+{% import_yaml '/srv/salt/vars.yml' as vars %}
+
 base: &base
   adapter: sqlite3
   timeout: 5000
@@ -15,7 +17,7 @@ private:
   host: localhost
   database: pwpusher
   username: pwpusher_database_user
-  password: test
+  password: {{ vars['database_password'] }}
   pool: 5
   timeout: 5000
   encoding: utf8
@@ -26,8 +28,9 @@ production:
   host: localhost
   database: pwpusher
   username: pwpusher_database_user
-  password: test
+  password: {{ vars['database_password'] }}
   pool: 5
   timeout: 5000
   encoding: utf8
   reconnect: false
+
