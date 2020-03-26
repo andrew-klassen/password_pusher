@@ -4,17 +4,23 @@ clone_password_push_repo:
     - name: https://github.com/pglombardo/PasswordPusher.git
     - target: /srv/salt/password_push
 
+# the Gemfile was adjusted to force the pg gem to be loaded for postgres "gem 'pg', '~> 0.21'"
 copy_gemfile:
   file.managed:
     - name: /srv/salt/password_push/Gemfile
-    - source: salt://Gemfile
+    - source: salt://source/Gemfile
 
-copy_database:
+copy_database.yml:
   file.managed:
     - name: /srv/salt/password_push/config/database.yml
-    - source: salt://database.yml
+    - source: salt://source/database.yml
 
-php.packages:
+copy_.env:
+  file.managed:
+    - name: /srv/salt/password_push/.env
+    - source: salt://source/.env
+
+install_app_packages_and_ruby_dependencies:
   pkg.installed:
     - pkgs:
       - ruby
@@ -28,38 +34,20 @@ php.packages:
       - ruby-sqlite3
       - libsqlite3-dev
       - libpq-dev
-      - postgresql-10
-      - postgresql-client-10
-      - nginx
-
-nginx_config:
-  file.managed:
-    - name: /etc/nginx/sites-enabled/default
-    - source: salt://default
-
-set_postgres password:
-  cmd.run:
-    - name: /srv/salt/create_database_user.sh 
-
-postgresql-restart:
-  service.running:
-    - name: postgresql
-    - enable: True
-    - full_restart: True
 
 update_all_gems:
   cmd.run:
     - name: gem update --system 3.0.6
 
-bundler_gem:
+install_bundler_gem:
   gem.installed:
     - name: bundler
 
-pg_gem:
+install_pg_gem:
   gem.installed:
     - name: pg
 
-forman_gem:
+install_foreman_gem:
   gem.installed:
     - name: foreman
       
@@ -78,13 +66,18 @@ bundle_exec_setup:
     - name: RAILS_ENV=production bundle exec rake db:setup
     - cwd: /srv/salt/password_push
 
-#foreman:
-#  cmd.run:
-#    - name: foreman start internalweb &
-#    - cwd: /srv/salt/password_push
+foreman_export:
+  cmd.run:
+    - name: foreman export --env .env -p5000 --user root --app pwpusher systemd /etc/systemd/system/
+    - cwd: /srv/salt/password_push
 
-nginx-service:
+reload_systemd:
+  cmd.run:
+    - name: systemctl daemon-reload
+
+password_pusher_restart_and_enable:
   service.running:
-    - name: nginx
+    - name: pwpusher.target
     - enable: True
-    - full_restart: True
+    - full_restart: True 
+
