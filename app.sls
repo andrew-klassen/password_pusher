@@ -80,5 +80,5 @@ password_pusher_restart_and_enable:
   service.running:
     - name: pwpusher.target
     - enable: True
-    - full_restart: True 
-
+    - watch:
+      - bundle_exec_setup
