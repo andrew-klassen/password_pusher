@@ -30,6 +30,12 @@ php.packages:
       - libpq-dev
       - postgresql-10
       - postgresql-client-10
+      - nginx
+
+nginx_config:
+  file.managed:
+    - name: /etc/nginx/sites-enabled/default
+    - source: salt://default
 
 set_postgres password:
   cmd.run:
@@ -77,3 +83,8 @@ bundle_exec_setup:
 #    - name: foreman start internalweb &
 #    - cwd: /srv/salt/password_push
 
+nginx-service:
+  service.running:
+    - name: nginx
+    - enable: True
+    - full_restart: True
